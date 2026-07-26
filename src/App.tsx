@@ -1,122 +1,104 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import './App.css'
+import { useState } from "react";
+import "./App.css";
+import { useExchangeRate } from "./useExchangeRate";
+import type { CurrencyOption } from "./types";
+
+const CURRENCIES: CurrencyOption[] = [
+  { code: "USD", label: "Dólar estadounidense" },
+  { code: "EUR", label: "Euro" },
+  { code: "ARS", label: "Peso argentino" },
+  { code: "CLP", label: "Peso chileno" },
+  { code: "BRL", label: "Real brasileño" },
+  { code: "GBP", label: "Libra esterlina" },
+  { code: "JPY", label: "Yen japonés" },
+];
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [amount, setAmount] = useState<string>("1");
+  const [from, setFrom] = useState<string>("USD");
+  const [to, setTo] = useState<string>("EUR");
+
+  const { rate, loading, error } = useExchangeRate(from, to);
+
+  const numericAmount = Number(amount) || 0;
+  const result = rate !== null ? numericAmount * rate : null;
+
+  function handleSwap() {
+    setFrom(to);
+    setTo(from);
+  }
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
+    <div className="converter">
+      <h1>Conversor de Monedas</h1>
+
+      <div className="field">
+        <label htmlFor="amount">Monto</label>
+        <input
+          id="amount"
+          type="number"
+          value={amount}
+          onChange={(e) => setAmount(e.target.value)}
+          min="0"
+        />
+      </div>
+
+      <div className="selectors">
+        <div className="field">
+          <label htmlFor="from">De</label>
+          <select
+            id="from"
+            value={from}
+            onChange={(e) => setFrom(e.target.value)}
+          >
+            {CURRENCIES.map((c) => (
+              <option key={c.code} value={c.code}>
+                {c.code} - {c.label}
+              </option>
+            ))}
+          </select>
         </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.tsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
+
         <button
           type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
+          className="swap-button"
+          onClick={handleSwap}
+          aria-label="Intercambiar monedas"
         >
-          Count is {count}
+          ⇄
         </button>
-      </section>
 
-      <div className="ticks"></div>
-
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
+        <div className="field">
+          <label htmlFor="to">A</label>
+          <select id="to" value={to} onChange={(e) => setTo(e.target.value)}>
+            {CURRENCIES.map((c) => (
+              <option key={c.code} value={c.code}>
+                {c.code} - {c.label}
+              </option>
+            ))}
+          </select>
         </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
+      </div>
 
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+      <div className="result">
+        {loading && <p>Cargando tasa de cambio...</p>}
+        {error && <p className="error">Error: {error}</p>}
+        {!loading && !error && result !== null && (
+          <p>
+            <strong>
+              {numericAmount} {from} = {result.toFixed(2)} {to}
+            </strong>
+            {rate !== null && from !== to && (
+              <span className="rate-info">
+                {" "}
+                (1 {from} = {rate.toFixed(4)} {to})
+              </span>
+            )}
+          </p>
+        )}
+      </div>
+    </div>
+  );
 }
 
-export default App
+export default App;
