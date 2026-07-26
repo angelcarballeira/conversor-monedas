@@ -23,7 +23,7 @@ Conversor de monedas simple hecho con Vite + React + TypeScript, como proyecto d
 ## 📦 Instalación local
 
 \`\`\`bash
-git clone https://github.com/TU_USUARIO/conversor-monedas.git
+git clone https://github.com/angelcarballeira/conversor-monedas
 cd conversor-monedas
 npm install
 npm run dev
