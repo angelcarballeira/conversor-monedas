@@ -36,7 +36,10 @@ export function useExchangeRate(
 
 
         if (!response.ok) {
-          throw new Error("No se pudo obtener la tasa de cambio");
+          if (response.status === 404 || response.status === 422) {
+            throw new Error(`No hay datos para ${from} → ${to}`);
+          }
+          throw new Error("No se pudo conectar con el servicio de tasas");
         }
 
         const data: ExchangeRateResponse = await response.json();

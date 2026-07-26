@@ -20,7 +20,7 @@ function App() {
 
   const { rate, loading, error } = useExchangeRate(from, to);
 
-  const numericAmount = Number(amount) || 0;
+  const numericAmount = Math.max(0, Number(amount) || 0);
   const result = rate !== null ? numericAmount * rate : null;
 
   function handleSwap() {
@@ -80,7 +80,7 @@ function App() {
         </div>
       </div>
 
-      <div className="result">
+      <div className="result" aria-live="polite">
         {loading && <p>Cargando tasa de cambio...</p>}
         {error && <p className="error">Error: {error}</p>}
         {!loading && !error && result !== null && (
